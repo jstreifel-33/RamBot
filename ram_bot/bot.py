@@ -1,17 +1,19 @@
 import os
 
+import random
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
 intents = discord.Intents().all()
-# client = discord.Bot(prefix = '', intents=intents)
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+
 
 @bot.event
 async def on_ready():
@@ -25,18 +27,34 @@ async def on_ready():
     # members = '\n - '.join([member.name for member in guild.members])
     # print(f'Guild Members:\n - {members}')
 
+
 #proof of life command
 @bot.command(name='rambot', help='hello world command')
 async def hello_world(ctx):
     response = 'Hello world!'
     await ctx.send(response)
 
+
+@bot.command(name='roll_dice', help='simulates rolling dice.')
+async def roll(ctx, number_of_dice: int, number_of_sides: int):
+    dice = [
+        str(random.choice(range(1, number_of_sides + 1)))
+        for _ in range(number_of_dice)
+    ]
+    await ctx.send(', '.join(dice))
+
+
+@bot.command(name='bot-thing')
+@commands.has_role('bot-person')
+async def bot_thing(ctx):
+    response = 'bot-thing successful!'
+    await ctx.send(response)
+
+
 @bot.event
-async def on_error(event, *args, **kwargs):
-    with open('err.log', 'a') as f:
-        if event == 'on_message':
-            f.write(f'Unhandled message: {args[0]}\n')
-        else:
-            raise
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.errors.CheckFailure):
+        await ctx.send('You do not have the correct role for this command.')
+
 
 bot.run(TOKEN)
