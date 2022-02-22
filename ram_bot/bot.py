@@ -33,8 +33,18 @@ async def on_message(message):
     #create response based on message
     if message.content == 'rambot':
         response = "Hello world!"
+    elif message.content == 'raise-exception':
+        raise discord.DiscordException
 
     #send response
     await message.channel.send(response)
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    with open('err.log', 'a') as f:
+        if event == 'on_message':
+            f.write(f'Unhandled message: {args[0]}\n')
+        else:
+            raise
 
 client.run(TOKEN)
