@@ -21,7 +21,20 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})'
         )
 
-    members = '\n - '.join([member.name for member in guild.members])
-    print(f'Guild Members:\n - {members}')
+    # members = '\n - '.join([member.name for member in guild.members])
+    # print(f'Guild Members:\n - {members}')
+
+@client.event
+async def on_message(message):
+    #avoid recursive loops
+    if message.author == client.user:
+        return
+
+    #create response based on message
+    if message.content == 'rambot':
+        response = "Hello world!"
+
+    #send response
+    await message.channel.send(response)
 
 client.run(TOKEN)
