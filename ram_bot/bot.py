@@ -1,6 +1,7 @@
 import os
 
 import discord
+from discord.ext import commands
 from dotenv import load_dotenv
 
 intents = discord.Intents().all()
@@ -10,36 +11,27 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-@client.event
+@bot.event
 async def on_ready():
-    guild = discord.utils.get(client.guilds, name=GUILD)
+    guild = discord.utils.get(bot.guilds, name=GUILD)
 
     print(
-        f'{client.user} has connected to the following guild:\n'
+        f'{bot.user.name} has connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})'
         )
 
     # members = '\n - '.join([member.name for member in guild.members])
     # print(f'Guild Members:\n - {members}')
 
-@client.event
-async def on_message(message):
-    #avoid recursive loops
-    if message.author == client.user:
-        return
+#proof of life command
+@bot.command(name='rambot', help='hello world command')
+async def hello_world(ctx):
+    response = 'Hello world!'
+    await ctx.send(response)
 
-    #create response based on message
-    if message.content == 'rambot':
-        response = "Hello world!"
-    elif message.content == 'raise-exception':
-        raise discord.DiscordException
-
-    #send response
-    await message.channel.send(response)
-
-@client.event
+@bot.event
 async def on_error(event, *args, **kwargs):
     with open('err.log', 'a') as f:
         if event == 'on_message':
@@ -47,4 +39,4 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-client.run(TOKEN)
+bot.run(TOKEN)
