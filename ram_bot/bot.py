@@ -1,6 +1,7 @@
 import os
 
 import random
+import requests
 
 import discord
 from discord.ext import commands
@@ -49,6 +50,24 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 async def bot_thing(ctx):
     response = 'bot-thing successful!'
     await ctx.send(response)
+
+
+@bot.command()
+async def trivia(ctx, category: str, num_questions: int):
+
+    categories = {
+        "general":9,
+        "film":11,
+        "music":12,
+        "art":25,
+        "history":23,
+        "geography":22,
+        "sports":21
+    }
+
+    URL = f'https://opentdb.com/api.php?amount={num_questions}&category={categories[category]}'
+
+    response = await fetch()
 
 
 @bot.event
