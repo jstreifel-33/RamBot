@@ -2,6 +2,7 @@ import os
 
 import random
 import json
+import html
 
 import requests
 import discord
@@ -67,14 +68,28 @@ async def trivia(ctx, category: str, num_questions: int):
     }
 
     if category not in categories:
-        ctx.send(f'invalid category!\nCategories are:{"\n - ".join(categories.keys())}')
+        await ctx.send(f'Invalid category!\nCategories are:\n - ' + '\n - '.join(categories.keys()))
 
     URL = f'https://opentdb.com/api.php?amount={num_questions}&category={categories[category]}'
 
-    res = await requests.get(URL)
-    response = json.loads(res)
+    res = requests.get(URL)
+    response = res.json()
 
-    print(response)
+    questions = response['results']
+
+    for q in questions:
+
+        choices = ['\na: ','\nb: ','\nc: ','\nd: ']
+
+        answers = q['incorrect_answers'] + [q['correct_answer']]
+        random.shuffle(answers)
+
+        message = q['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
+
+        message = html.unescape(message)
+
+        await ctx.send(message)
+
 
 
 
