@@ -8,6 +8,7 @@ authors = ["Joe Streifel <josephstreifel@gmail.com>"]
 python = "^3.9"
 "discord.py" = "^1.7.3"
 python-dotenv = "^0.19.2"
+requests = "^2.27.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
