@@ -1,8 +1,9 @@
 import os
 
 import random
-import requests
+import json
 
+import requests
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -65,9 +66,16 @@ async def trivia(ctx, category: str, num_questions: int):
         "sports":21
     }
 
+    if category not in categories:
+        ctx.send(f'invalid category!\nCategories are:{"\n - ".join(categories.keys())}')
+
     URL = f'https://opentdb.com/api.php?amount={num_questions}&category={categories[category]}'
 
-    response = await fetch()
+    res = await requests.get(URL)
+    response = json.loads(res)
+
+    print(response)
+
 
 
 @bot.event
