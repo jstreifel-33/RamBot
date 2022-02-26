@@ -77,18 +77,23 @@ async def trivia(ctx, category: str, num_questions: int):
 
     questions = response['results']
 
-    for q in questions:
-
+    #function for question sequence
+    async def ask_sequence(question):
         choices = ['\na: ','\nb: ','\nc: ','\nd: ']
 
-        answers = q['incorrect_answers'] + [q['correct_answer']]
+        answers = question['incorrect_answers'] + [question['correct_answer']]
         random.shuffle(answers)
 
-        message = q['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
+        message = question['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
 
         message = html.unescape(message)
 
         await ctx.send(message)
+
+    #execute ask_sequence for each question returned
+    for q in questions:
+        ask_sequence(q)
+        
 
 
 
