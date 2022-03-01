@@ -54,8 +54,11 @@ async def bot_thing(ctx):
     await ctx.send(response)
 
 
-@bot.command()
-async def trivia(ctx, category: str, num_questions: int):
+@bot.command(
+    help = "Command: trivia category number_of_questions. \nWill start a game of trivia.",
+    brief = "Play a game of trivia."
+)
+async def trivia(ctx, category: str, num_questions: int = 0):
 
     categories = {
         "general":9,
@@ -82,6 +85,7 @@ async def trivia(ctx, category: str, num_questions: int):
         choices = ['\na: ','\nb: ','\nc: ','\nd: ']
 
         answers = question['incorrect_answers'] + [question['correct_answer']]
+        
         random.shuffle(answers)
 
         message = question['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
