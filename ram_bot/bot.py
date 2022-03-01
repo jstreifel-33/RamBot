@@ -58,7 +58,7 @@ async def bot_thing(ctx):
     help = "Command: trivia category number_of_questions. \nWill start a game of trivia.",
     brief = "Play a game of trivia."
 )
-async def trivia(ctx, category: str, num_questions: int = 0):
+async def trivia(ctx, category: str, num_questions: int):
 
     categories = {
         "general":9,
@@ -85,18 +85,31 @@ async def trivia(ctx, category: str, num_questions: int = 0):
         choices = ['\na: ','\nb: ','\nc: ','\nd: ']
 
         answers = question['incorrect_answers'] + [question['correct_answer']]
-        
+
         random.shuffle(answers)
 
         message = question['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
 
         message = html.unescape(message)
 
-        await ctx.send(message)
+        embed_msg = await ctx.send(message)
+
+        emojis = {
+            'a':'\U0001F1E6',
+            'b':'\U0001F1E7',
+            'c':'\U0001F1E8',
+            'd':'\U0001F1E9',
+            'next': '\U000023ED'
+            }
+        await embed_msg.add_reaction(emojis['a'])
+        await embed_msg.add_reaction(emojis['b'])
+        await embed_msg.add_reaction(emojis['c'])
+        await embed_msg.add_reaction(emojis['d'])
+        await embed_msg.add_reaction(emojis['next'])
 
     #execute ask_sequence for each question returned
     for q in questions:
-        ask_sequence(q)
+        await ask_sequence(q)
         
 
 
