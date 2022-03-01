@@ -108,6 +108,8 @@ async def trivia(ctx, category: str, num_questions: int):
         await embed_msg.add_reaction(emojis['next'])
 
     #execute ask_sequence for each question returned
+    #NOTE: Might be better to must pop questions while keeping score? Sequence of events needs to depend on players. Create trivia class?
+    
     for q in questions:
         await ask_sequence(q)
         
