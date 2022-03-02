@@ -1,7 +1,6 @@
 import os
 
 import random
-import json
 import html
 
 import requests
@@ -18,6 +17,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 
+#-- START UP ROUTINE --
 @bot.event
 async def on_ready():
     guild = discord.utils.get(bot.guilds, name=GUILD)
@@ -31,13 +31,14 @@ async def on_ready():
     # print(f'Guild Members:\n - {members}')
 
 
-#proof of life command
+#-- PROOF OF LIFE COMMAND --
 @bot.command(name='rambot', help='hello world command')
 async def hello_world(ctx):
     response = 'Hello world!'
     await ctx.send(response)
 
 
+#-- DICE ROLLING COMMAND --
 @bot.command(name='roll_dice', help='simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
     dice = [
@@ -47,6 +48,7 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.send(', '.join(dice))
 
 
+#-- ROLE PERMISSION TEST --
 @bot.command(name='bot-thing')
 @commands.has_role('bot-person')
 async def bot_thing(ctx):
@@ -54,6 +56,7 @@ async def bot_thing(ctx):
     await ctx.send(response)
 
 
+#-- TRIVIA COMMAND --
 @bot.command(
     help = "Command: trivia category number_of_questions. \nWill start a game of trivia.",
     brief = "Play a game of trivia."
@@ -109,18 +112,17 @@ async def trivia(ctx, category: str, num_questions: int):
 
     #execute ask_sequence for each question returned
     #NOTE: Might be better to must pop questions while keeping score? Sequence of events needs to depend on players. Create trivia class?
-    
+
     for q in questions:
         await ask_sequence(q)
         
 
-
-
-
+#-- ERROR HANDLING --
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
 
 
+#-- RUN --
 bot.run(TOKEN)
