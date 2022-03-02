@@ -8,6 +8,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from ram_bot.trivia import TriviaGame
+
 intents = discord.Intents().all()
 
 load_dotenv()
@@ -16,6 +18,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+bot.add_cog(TriviaGame(bot))
 
 #-- START UP ROUTINE --
 @bot.event
@@ -54,67 +57,6 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 async def bot_thing(ctx):
     response = 'bot-thing successful!'
     await ctx.send(response)
-
-
-#-- TRIVIA COMMAND --
-@bot.command(
-    help = "Command: trivia category number_of_questions. \nWill start a game of trivia.",
-    brief = "Play a game of trivia."
-)
-async def trivia(ctx, category: str, num_questions: int):
-
-    categories = {
-        "general":9,
-        "film":11,
-        "music":12,
-        "art":25,
-        "history":23,
-        "geography":22,
-        "sports":21
-    }
-
-    if category not in categories:
-        await ctx.send(f'Invalid category!\nCategories are:\n - ' + '\n - '.join(categories.keys()))
-
-    URL = f'https://opentdb.com/api.php?amount={num_questions}&category={categories[category]}'
-
-    res = requests.get(URL)
-    response = res.json()
-
-    questions = response['results']
-
-    #function for question sequence
-    async def ask_sequence(question):
-        choices = ['\na: ','\nb: ','\nc: ','\nd: ']
-
-        answers = question['incorrect_answers'] + [question['correct_answer']]
-
-        random.shuffle(answers)
-
-        message = question['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
-
-        message = html.unescape(message)
-
-        embed_msg = await ctx.send(message)
-
-        emojis = {
-            'a':'\U0001F1E6',
-            'b':'\U0001F1E7',
-            'c':'\U0001F1E8',
-            'd':'\U0001F1E9',
-            'next': '\U000023ED'
-            }
-        await embed_msg.add_reaction(emojis['a'])
-        await embed_msg.add_reaction(emojis['b'])
-        await embed_msg.add_reaction(emojis['c'])
-        await embed_msg.add_reaction(emojis['d'])
-        await embed_msg.add_reaction(emojis['next'])
-
-    #execute ask_sequence for each question returned
-    #NOTE: Might be better to must pop questions while keeping score? Sequence of events needs to depend on players. Create trivia class?
-
-    for q in questions:
-        await ask_sequence(q)
         
 
 #-- ERROR HANDLING --
