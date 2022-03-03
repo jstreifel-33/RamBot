@@ -7,14 +7,6 @@ import discord
 from discord.ext import commands
 
 
-def get_key(some_dict, val):
-    for key, value in some_dict.items():
-         if val == value:
-             return key
- 
-    return "key doesn't exist"
-
-
 class TriviaGame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -38,9 +30,10 @@ class TriviaGame(commands.Cog):
     async def trivia(self, ctx, category: str, num_questions: int):
         """Will start a game of trivia.
         """
-
+        #store context in state
         self.ctx = ctx
 
+        #check for valid category
         if category not in self.categories:
             await self.ctx.send(f'Invalid category!\nCategories are:\n - ' + '\n - '.join(self.categories.keys()))
 
@@ -55,17 +48,18 @@ class TriviaGame(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
+        #bot should not respond to its own reactions
         if reaction.message.id == self._last_q_msg.id and user != self.bot.user:
+            #handle "next" button
             if str(reaction) == '⏭':
-                print('proceeding')
+                #TODO:check answers and award points
+
+                #ask next question or end game
                 if self.questions:
-                    print('asking next question')
                     await self.ask_question()
                 else:
                     await self.ctx.send('Out of questions! Game over!')
-            #handle checking answer and allocating points
-            print('reaction detected: ', reaction)
-            print('user: ', user)
+
 
     async def ask_question(self):
         
@@ -86,12 +80,12 @@ class TriviaGame(commands.Cog):
         key.sort(key=lambda item: item['option'])
         self.key = key
 
+        #generate and send message containing question
         message = self._last_q_content['question'] + ''.join([answer['prefix']+answer['answer'] for answer in self.key])
-
         message = html.unescape(message)
-
         self._last_q_msg = await self.ctx.send(message)
 
+        #add reactions for controls
         emojis = {
             'a':'🇦',
             'b':'🇧',
@@ -102,5 +96,5 @@ class TriviaGame(commands.Cog):
 
         for answer in self.key:
             await self._last_q_msg.add_reaction(emojis[answer['option']])
-   
+
         await self._last_q_msg.add_reaction(emojis['next'])
