@@ -7,6 +7,14 @@ import discord
 from discord.ext import commands
 
 
+def get_key(some_dict, val):
+    for key, value in some_dict.items():
+         if val == value:
+             return key
+ 
+    return "key doesn't exist"
+
+
 class TriviaGame(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -21,12 +29,13 @@ class TriviaGame(commands.Cog):
         }
         self.ctx = None
         self.questions = None
-        self.scores = None
+        self.scores = {}
         self._last_q_content = None
+        self.key = None
         self._last_q_msg = None
 
     @commands.command()
-    async def trivia_cog(self, ctx, category: str, num_questions: int):
+    async def trivia(self, ctx, category: str, num_questions: int):
         """Will start a game of trivia.
         """
 
@@ -46,9 +55,10 @@ class TriviaGame(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        if reaction.message.id == self._last_q_msg.id and user != self.bot:
+        if reaction.message.id == self._last_q_msg.id and user != self.bot.user:
             #handle checking answer and allocating points
             print('reaction detected: ', reaction)
+            print('user: ', user)
 
     async def ask_question(self):
         
@@ -59,13 +69,24 @@ class TriviaGame(commands.Cog):
             #This condition should eventually move to on_reaction_add
             return
 
-        choices = ['\na: ','\nb: ','\nc: ','\nd: ']
+        #initialize how many answer choices
+        if self._last_q_content['type'] == 'multiple':
+            choices = ['\na) ','\nb) ','\nc) ','\nd) ']
+        elif self._last_q_content['type'] == 'boolean':
+            choices = ['\na) ','\nb) ']
 
+        #generate a key
+        random.shuffle(choices)
         answers = self._last_q_content['incorrect_answers'] + [self._last_q_content['correct_answer']]
+        key = [{'option':choices[idx][1], 'prefix':choices[idx], 'answer':answer, 'correct':answer==self._last_q_content['correct_answer'],} for idx, answer in enumerate(answers)]
 
-        random.shuffle(answers)
+        #store the key in object state
+        key.sort(key=lambda item: item['option'])
+        self.key = key
 
-        message = self._last_q_content['question'] + ''.join([choices[idx]+answer for idx, answer in enumerate(answers)])
+        print(self.key)
+
+        message = self._last_q_content['question'] + ''.join([answer['prefix']+answer['answer'] for answer in self.key])
 
         message = html.unescape(message)
 
@@ -78,8 +99,8 @@ class TriviaGame(commands.Cog):
             'd':'🇩',
             'next': '⏭'
             }
-        await self._last_q_msg.add_reaction(emojis['a'])
-        await self._last_q_msg.add_reaction(emojis['b'])
-        await self._last_q_msg.add_reaction(emojis['c'])
-        await self._last_q_msg.add_reaction(emojis['d'])
+
+        for answer in self.key:
+            await self._last_q_msg.add_reaction(emojis[answer['option']])
+   
         await self._last_q_msg.add_reaction(emojis['next'])
