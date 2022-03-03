@@ -56,6 +56,13 @@ class TriviaGame(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if reaction.message.id == self._last_q_msg.id and user != self.bot.user:
+            if str(reaction) == '⏭':
+                print('proceeding')
+                if self.questions:
+                    print('asking next question')
+                    await self.ask_question()
+                else:
+                    await self.ctx.send('Out of questions! Game over!')
             #handle checking answer and allocating points
             print('reaction detected: ', reaction)
             print('user: ', user)
@@ -83,8 +90,6 @@ class TriviaGame(commands.Cog):
         #store the key in object state
         key.sort(key=lambda item: item['option'])
         self.key = key
-
-        print(self.key)
 
         message = self._last_q_content['question'] + ''.join([answer['prefix']+answer['answer'] for answer in self.key])
 
