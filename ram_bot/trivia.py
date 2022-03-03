@@ -69,12 +69,7 @@ class TriviaGame(commands.Cog):
 
     async def ask_question(self):
         
-        if self.questions:
-            self._last_q_content = self.questions.pop()
-        else:
-            #execute end game command?
-            #This condition should eventually move to on_reaction_add
-            return
+        self._last_q_content = self.questions.pop()
 
         #initialize how many answer choices
         if self._last_q_content['type'] == 'multiple':
